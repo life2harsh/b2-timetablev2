@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timetable</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background-color: #4CAF50;
+      color: white;
+      gap: 1rem;
+    }
+    .header button {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .header button:hover {
+      background-color: #555;
+    }
+    .button-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    /* Today's Schedule Container */
+    #todayScheduleContainer {
+      margin: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    #todayScheduleContainer h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .schedule-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .schedule-card {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      min-width: 120px;
+      transition: transform 0.3s, border 0.3s, box-shadow 0.3s;
+    }
+    /* Highlight and enlarge the current class card */
+    .schedule-card.current {
+      transform: scale(1.1);
+      border: 2px solid #FFD700;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Table Container */
+    .table-container {
+      margin: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+      /* Optional box-shadow for a smoother look */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    /* Smooth show/hide animation */
+    table {
+      width: 100%;
+      border-collapse: separate; 
+      border-spacing: 10px; /* spacing between cells */
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+    }
+    table.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    thead th {
+      background-color: #4CAF50;
+      color: white;
+      padding: 0.75rem;
+      border-radius: 6px;
+    }
+    tbody td {
+      vertical-align: top;
+    }
+    /* Each cell will contain a card for the subject. */
+    .card {
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-weight: bold;
+      color: #333;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .card p {
+      margin: 0.25rem 0;
+    }
+
+    /* Color Classes (Light Mode) */
+    .green { background-color: #c8e6c9; }
+    .red { background-color: #ffcdd2; }
+    .blue { background-color: #bbdefb; }
+    .lavender { background-color: #e6e6fa; }
+
+    /* Dark Mode Scheme */
+    body.dark-mode {
+      background-color: #202124;
+      color: #e8eaed;
+    }
+    body.dark-mode .header {
+      background-color: #303134;
+    }
+    body.dark-mode .header button {
+      background-color: #5f6368;
+      color: #e8eaed; 
+    }
+    body.dark-mode .header button:hover {
+      background-color: #73777b; 
+    }
+    body.dark-mode #todayScheduleContainer {
+      background: #303134;
+      color: #e8eaed;
+    }
+    body.dark-mode .schedule-card {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    body.dark-mode thead th {
+      background-color: #3c4043;
+    }
+    body.dark-mode .card {
+      color: #e8eaed;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    body.dark-mode .green { background-color: #81c784; }
+    body.dark-mode .red { background-color: #e57373; }
+    body.dark-mode .blue { background-color: #64b5f6; }
+    body.dark-mode .lavender { background-color: #9575cd; }
+  </style>
+</head>
+<link rel="manifest" href="/manifest.json" />
+<body>
+  <div class="header">
+    <h1>B2 Timetable</h1>
+    <div class="button-group">
+      <button id="darkModeToggle">Toggle Dark Mode</button>
+      <button id="showFullTimetable">FULL TIMETABLE</button>
+    </div>
+  </div>
+
+  <!-- Today's Schedule -->
+  <div id="todayScheduleContainer">
+    <h2>Today's Schedule</h2>
+    <div id="todaySchedule" class="schedule-cards"></div>
+  </div>
+
+  <!-- Full Timetable -->
+  <div class="table-container">
+    <table id="fullTimetable">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>9:00-9:50</th>
+          <th>10:00-10:50</th>
+          <th>11:00-11:50</th>
+          <th>12:00-12:50</th>
+          <th>1:00-1:50</th>
+          <th>2:00-2:50</th>
+          <th>3:00-3:50</th>
+          <th>4:00-4:50</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Monday -->
+        <tr>
+          <td><strong>Monday</strong></td>
+          <!-- 9:00-9:50 & 10:00-10:50 combined (colspan=2) for Life Skills -->
+          <td colspan="2">
+            <div class="card lavender">
+              <p>Life Skills</p>
+              <p>CL12</p>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="card blue">
+              <p>Mathematics-2</p>
+              <p>G5</p>
+            </div>
+          </td>
+          <td>
+            <div class="card green">
+              <p>UHV</p>
+              <p>G1</p>
+            </div>
+          </td>
+          <td>
+            <div class="card blue">
+              <p>Physics-2</p>
+              <p>G1</p>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+
+        <!-- Tuesday -->
+        <tr>
+          <td><strong>Tuesday</strong></td>
+          <td></td>
+          <td>
+            <div class="card blue">
+              <p>Mathematics-2</p>
+              <p>G2</p>
+            </div>
+          </td>
+          <td>
+            <div class="card red">
+              <p>SDF</p>
+              <p>TS8</p>
+            </div>
+          </td>
+          <td></td>
+          <!-- 1:00-2:50 combined (colspan=2) for Physics Lab-2 -->
+          <td colspan="2">
+            <div class="card lavender">
+              <p>Physics Lab-2</p>
+              <p>PL2</p>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+        </tr>
+
+        <!-- Wednesday -->
+        <tr>
+          <td><strong>Wednesday</strong></td>
+          <td></td>
+          <td>
+            <div class="card red">
+              <p>UHV</p>
+              <p>TS12</p>
+            </div>
+          </td>
+          <td>
+            <div class="card red">
+              <p>Physics-2</p>
+              <p>TS12</p>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="card blue">
+              <p>Mathematics-2</p>
+              <p>G3</p>
+            </div>
+          </td>
+          <td>
+            <div class="card blue">
+              <p>SDF</p>
+              <p>G1</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Thursday -->
+        <tr>
+          <td><strong>Thursday</strong></td>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="card red">
+              <p>Mathematics-2</p>
+              <p>TS10</p>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+          <!-- 2:00-4:50 combined (colspan=3) for Engg. Drawing -->
+          <td colspan="3">
+            <div class="card lavender">
+              <p>Engineering Drawing &amp; Design</p>
+              <p>CAD2</p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Friday -->
+        <tr>
+          <td><strong>Friday</strong></td>
+          <td>
+            <div class="card blue">
+              <p>Physics-2</p>
+              <p>G3</p>
+            </div>
+          </td>
+          <td>
+            <div class="card green">
+              <p>UHV</p>
+              <p>G3</p>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <div class="card blue">
+              <p>SDF</p>
+              <p>G3</p>
+            </div>
+          </td>
+          <td></td>
+        </tr>
+
+        <!-- Saturday -->
+        <tr>
+          <td><strong>Saturday</strong></td>
+          <td>
+            <div class="card blue">
+              <p>SDF</p>
+              <p>G3</p>
+            </div>
+          </td>
+          <td>
+            <div class="card blue">
+              <p>Physics-2</p>
+              <p>G3</p>
+            </div>
+          </td>
+          <!-- 11:00-12:50 combined (colspan=2) for SDF Lab -->
+          <td colspan="2">
+            <div class="card lavender">
+              <p>SDF Lab</p>
+              <p>CL02</p>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const showFullTimetable = document.getElementById('showFullTimetable');
+    const body = document.body;
+    const fullTimetable = document.getElementById('fullTimetable');
+    const todaySchedule = document.getElementById('todaySchedule');
+
+    // Get current day (e.g. "Monday")
+    const currentDay = new Date().toLocaleString('en-us', { weekday: 'long' });
+
+    // Keep your existing schedule data for daily schedule
+    const daySchedules = {
+      Monday: [
+        { time: '9:00-10:50', subject: 'Life Skills', location: 'CL12', color: 'lavender' },
+        { time: '1:00-1:50', subject: 'Mathematics-2', location: 'G5', color: 'blue' },
+        { time: '2:00-2:50', subject: 'UHV', location: 'G1', color: 'green' },
+        { time: '3:00-3:50', subject: 'Physics-2', location: 'G1', color: 'blue' }
+      ],
+      Tuesday: [
+        { time: '10:00-10:50', subject: 'Mathematics-2', location: 'G2', color: 'blue' },
+        { time: '11:00-11:50', subject: 'SDF', location: 'TS8', color: 'red' },
+        { time: '1:00-2:50', subject: 'Physics Lab-2', location: 'PL2', color: 'lavender' }
+      ],
+      Wednesday: [
+        { time: '10:00-10:50', subject: 'UHV', location: 'TS12', color: 'red' },
+        { time: '11:00-11:50', subject: 'Physics-2', location: 'TS12', color: 'red' },
+        { time: '3:00-3:50', subject: 'Mathematics-2', location: 'G3', color: 'blue' },
+        { time: '4:00-4:50', subject: 'SDF', location: 'G1', color: 'blue' }
+      ],
+      Thursday: [
+        { time: '11:00-11:50', subject: 'Mathematics-2', location: 'TS10', color: 'red' },
+        { time: '2:00-4:50', subject: 'Engineering Drawing and Design', location: 'CAD2', color: 'lavender' }
+      ],
+      Friday: [
+        { time: '9:00-9:50', subject: 'Physics-2', location: 'G3', color: 'blue' },
+        { time: '10:00-10:50', subject: 'UHV', location: 'G3', color: 'blue' },
+        { time: '3:00-3:50', subject: 'SDF', location: 'G3', color: 'blue' }
+      ],
+      Saturday: [
+        { time: '9:00-9:50', subject: 'SDF', location: 'G3', color: 'blue' },
+        { time: '10:00-10:50', subject: 'Physics-2', location: 'G3', color: 'blue' },
+        { time: '11:00-12:50', subject: 'SDF Lab', location: 'CL02', color: 'lavender' }
+      ]
+    };
+
+    // Helper function: convert "9:00" to minutes since midnight
+    function parseTime(timeStr) {
+      let [hour, minute] = timeStr.split(':').map(Number);
+      // For times that might be in the afternoon, adjust if needed
+      if (hour < 7) hour += 12;
+      return hour * 60 + minute;
+    }
+
+    // Render today's schedule, highlighting current class and showing remaining time
+    function renderTodaySchedule() {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const slots = daySchedules[currentDay];
+      
+      if (slots) {
+        todaySchedule.innerHTML = slots.map(slot => {
+          const [startStr, endStr] = slot.time.split('-');
+          const start = parseTime(startStr.trim());
+          const end = parseTime(endStr.trim());
+          const isCurrent = currentMinutes >= start && currentMinutes < end;
+          const remaining = isCurrent ? end - currentMinutes : null;
+          return `
+            <div class="schedule-card ${slot.color} ${isCurrent ? 'current' : ''}">
+              <p><strong>${slot.time}</strong></p>
+              <p>${slot.subject}</p>
+              <p>${slot.location}</p>
+              ${isCurrent ? `<p>Remaining: ${remaining} min</p>` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        todaySchedule.innerHTML = `<p>No Classes Today</p>`;
+      }
+    }
+
+    // Initial render and update every minute
+    renderTodaySchedule();
+    setInterval(renderTodaySchedule, 10000);
+
+    // Dark Mode Toggle
+    darkModeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+    });
+    if (localStorage.getItem('darkMode') === 'true') {
+      body.classList.add('dark-mode');
+    }
+
+    // Show/Hide Full Timetable
+    showFullTimetable.addEventListener('click', () => {
+      fullTimetable.classList.toggle('visible');
+    });
+  </script>
+</body>
+</html>
