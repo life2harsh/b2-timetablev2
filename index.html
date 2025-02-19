@@ -66,7 +66,6 @@
       min-width: 120px;
       transition: transform 0.3s, border 0.3s, box-shadow 0.3s;
     }
-    /* Highlight and enlarge the current class card */
     .schedule-card.current {
       transform: scale(1.1);
       border: 2px solid #FFD700;
@@ -75,16 +74,20 @@
     .table-container {
       margin: 1rem;
       border-radius: 8px;
-      overflow: hidden;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      /* Key change: allow horizontal scrolling */
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch; /* smoother scrolling on iOS */
     }
     table {
-      width: 100%;
+      /* Force horizontal scroll if screen is too narrow */
+      min-width: 900px;
       border-collapse: separate; 
       border-spacing: 10px;
       opacity: 0;
       transform: translateY(20px);
       transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+      width: 100%;
     }
     table.visible {
       opacity: 1;
@@ -114,7 +117,6 @@
     .red { background-color: #ffcdd2; }
     .blue { background-color: #bbdefb; }
     .lavender { background-color: #e6e6fa; }
-    
     body.dark-mode {
       background-color: #202124;
       color: #e8eaed;
@@ -158,12 +160,10 @@
       <button id="showFullTimetable">FULL TIMETABLE</button>
     </div>
   </div>
-
   <div id="todayScheduleContainer">
     <h2>Today's Schedule</h2>
     <div id="todaySchedule" class="schedule-cards"></div>
   </div>
-
   <div class="table-container">
     <table id="fullTimetable">
       <thead>
@@ -210,7 +210,6 @@
           </td>
           <td></td>
         </tr>
-
         <tr>
           <td><strong>Tuesday</strong></td>
           <td></td>
@@ -236,7 +235,6 @@
           <td></td>
           <td></td>
         </tr>
-        
         <tr>
           <td><strong>Wednesday</strong></td>
           <td></td>
@@ -268,7 +266,6 @@
             </div>
           </td>
         </tr>
-        
         <tr>
           <td><strong>Thursday</strong></td>
           <td></td>
@@ -288,7 +285,6 @@
             </div>
           </td>
         </tr>
-        
         <tr>
           <td><strong>Friday</strong></td>
           <td>
@@ -315,7 +311,6 @@
           </td>
           <td></td>
         </tr>
-        
         <tr>
           <td><strong>Saturday</strong></td>
           <td>
@@ -344,7 +339,6 @@
       </tbody>
     </table>
   </div>
-
   <script>
     const darkModeToggle = document.getElementById('darkModeToggle');
     const showFullTimetable = document.getElementById('showFullTimetable');
@@ -394,7 +388,6 @@
       const now = new Date();
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
       const slots = daySchedules[currentDay];
-      
       if (slots) {
         todaySchedule.innerHTML = slots.map(slot => {
           const [startStr, endStr] = slot.time.split('-');
@@ -412,7 +405,7 @@
           `;
         }).join('');
       } else {
-        todaySchedule.innerHTML = `<p>No Classes Today</p>`;
+        todaySchedule.innerHTML = '<p>No Classes Today</p>';
       }
     }
     renderTodaySchedule();
