@@ -2,37 +2,39 @@ const { useState, useEffect, useCallback } = React;
 
 const daySchedules = {
   Monday: [
-    { time: '9:00-10:50', subject: 'Life Skills', location: 'CL12', color: 'lavender' },
-    { time: '1:00-1:50', subject: 'Mathematics-2', location: 'G5', color: 'blue' },
-    { time: '2:00-2:50', subject: 'UHV', location: 'G1', color: 'green' },
-    { time: '3:00-3:50', subject: 'Physics-2', location: 'G1', color: 'blue' }
+    { time: '9:00-10:00', subject: 'Maths AIDS(T)', location: 'TS16', color: 'lavender' },
+    { time: '10:00-11:00', subject: 'Data Structures', location: 'FF6', color: 'blue' },
+    { time: '12:00-1:00', subject: 'Computational Theory', location: 'G1', color: 'green' },
+    { time: '3:00-5:00', subject: 'DBMS LAB', location: 'CL13', color: 'red' }
   ],
   Tuesday: [
-    { time: '10:00-10:50', subject: 'Mathematics-2', location: 'G2', color: 'blue' },
-    { time: '11:00-11:50', subject: 'SDF', location: 'TS8', color: 'red' },
-    { time: '1:00-2:50', subject: 'Physics Lab-2', location: 'PL2', color: 'lavender' }
+    { time: '9:00-10:00', subject: 'Maths AIDS (Lec)', location: 'FF6', color: 'blue' },
+    { time: '10:00-11:00', subject: 'UNIX (Lec)', location: 'CR256', color: 'green' },
+    { time: '11:00-12:00', subject: 'Computational Theory', location: 'G3', color: 'red' },
+    { time: '12:00-1:00', subject: 'DBMS', location: 'FF6', color: 'lavender' },
+    { time: '2:00-3:00', subject: 'Data Structures', location: 'G1', color: 'blue' },
+    { time: '4:00-5:00', subject: 'Economics', location: 'FF6', color: 'green' }
   ],
   Wednesday: [
-    { time: '10:00-10:50', subject: 'UHV', location: 'TS12', color: 'red' },
-    { time: '11:00-11:50', subject: 'Physics-2', location: 'TS12', color: 'red' },
-    { time: '3:00-3:50', subject: 'Mathematics-2', location: 'G3', color: 'blue' },
-    { time: '4:00-4:50', subject: 'SDF', location: 'G1', color: 'blue' }
+    { time: '9:00-11:00', subject: 'Data Structures(Lab)', location: 'CL13', color: 'red' },
+    { time: '11:00-12:00', subject: 'Data Structures', location: 'FF6', color: 'blue' },
+    { time: '12:00-1:00', subject: 'Maths AIDS (Lec)', location: 'G2', color: 'green' }
   ],
   Thursday: [
-    { time: '11:00-11:50', subject: 'Mathematics-2', location: 'TS10', color: 'red' },
-    { time: '2:00-4:50', subject: 'Engineering Drawing and Design', location: 'CAD2', color: 'lavender' }
+    { time: '9:00-10:00', subject: 'Computational Theory', location: 'CS4', color: 'lavender' },
+    { time: '11:00-12:00', subject: 'Economics', location: 'FF6', color: 'green' },
+    { time: '12:00-1:00', subject: 'Economics Tut', location: 'TS6', color: 'blue' },
+    { time: '2:00-3:00', subject: 'DBMS', location: 'FF6', color: 'red' },
+    { time: '3:00-4:00', subject: 'Maths AIDS', location: 'FF6', color: 'lavender' }
   ],
   Friday: [
-    { time: '9:00-9:50', subject: 'Physics-2', location: 'G3', color: 'blue' },
-    { time: '10:00-10:50', subject: 'UHV', location: 'G3', color: 'green' },
-    { time: '3:00-3:50', subject: 'SDF', location: 'G3', color: 'blue' }
-  ],
-  Saturday: [
-    { time: '9:00-9:50', subject: 'SDF', location: 'G3', color: 'blue' },
-    { time: '10:00-10:50', subject: 'Physics-2', location: 'G3', color: 'blue' },
-    { time: '11:00-12:50', subject: 'SDF Lab', location: 'CL02', color: 'lavender' }
+    { time: '9:00-11:00', subject: 'UNIX LAB', location: 'CL09', color: 'green' },
+    { time: '11:00-12:00', subject: 'Data Structure', location: 'TS10', color: 'blue' },
+    { time: '12:00-1:00', subject: 'DBMS', location: 'FF6', color: 'red' },
+    { time: '3:00-5:00', subject: 'JAVA LAB', location: 'CL06', color: 'lavender' }
   ]
 };
+
 
 const parseTime = (timeStr) => {
   let [hour, minute] = timeStr.split(':').map(Number);
