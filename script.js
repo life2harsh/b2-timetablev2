@@ -1,6 +1,3 @@
-Here is the code with all comments removed.
-
-```jsx
 const { useState, useEffect, useCallback } = React;
 
 const daySchedules = {
@@ -316,4 +313,3 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
-```
