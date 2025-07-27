@@ -1,3 +1,6 @@
+Here is the code with all comments removed.
+
+```jsx
 const { useState, useEffect, useCallback } = React;
 
 const daySchedules = {
@@ -34,7 +37,6 @@ const daySchedules = {
     { time: '3:00-5:00', subject: 'JAVA LAB', location: 'CL06', color: 'lavender' }
   ]
 };
-
 
 const parseTime = (timeStr) => {
   let [hour, minute] = timeStr.split(':').map(Number);
@@ -164,12 +166,6 @@ const TimetableApp = () => {
 
   const toggleFullTimetable = () => {
     setShowFullTimetable(!showFullTimetable);
-    setTimeout(() => {
-      const table = document.getElementById('fullTimetable');
-      if (table) {
-        table.classList.toggle('visible', !showFullTimetable);
-      }
-    }, 50);
   };
 
   const renderTodaySchedule = () => {
@@ -181,7 +177,6 @@ const TimetableApp = () => {
       const [startStr, endStr] = slot.time.split('-');
       const start = parseTime(startStr.trim());
       const end = parseTime(endStr.trim());
-
       const isCurrent = currentMinutes >= start && currentMinutes < end;
 
       return (
@@ -195,48 +190,45 @@ const TimetableApp = () => {
   };
 
   const renderTimetableRow = (day, slots) => {
-    const timeSlots = [
-      '9:00-9:50', '10:00-10:50', '11:00-11:50', '12:00-12:50',
-      '1:00-1:50', '2:00-2:50', '3:00-3:50', '4:00-4:50'
-    ];
+    const tableHours = [540, 600, 660, 720, 780, 840, 900, 960];
+
+    const scheduleMap = new Map();
+    slots.forEach(slot => {
+      const startTime = parseTime(slot.time.split('-')[0].trim());
+      scheduleMap.set(startTime, slot);
+    });
+
+    const cells = [];
+    for (let i = 0; i < tableHours.length; ) {
+      const hourStart = tableHours[i];
+      const matchingSlot = scheduleMap.get(hourStart);
+
+      if (matchingSlot) {
+        const [startStr, endStr] = matchingSlot.time.split('-');
+        const startTime = parseTime(startStr.trim());
+        const endTime = parseTime(endStr.trim());
+        const duration = endTime - startTime;
+        const colspan = Math.round(duration / 60);
+
+        cells.push(
+          <td key={`${day}-${hourStart}`} colSpan={colspan}>
+            <div className={`card ${matchingSlot.color}`}>
+              <p>{matchingSlot.subject}</p>
+              <p>{matchingSlot.location}</p>
+            </div>
+          </td>
+        );
+        i += colspan;
+      } else {
+        cells.push(<td key={`${day}-${hourStart}`} />);
+        i++;
+      }
+    }
 
     return (
       <tr key={day}>
         <td><strong>{day}</strong></td>
-        {timeSlots.map((timeSlot, index) => {
-          const matchingSlot = slots.find(slot => slot.time === timeSlot);
-          const multiSlot = slots.find(slot => slot.time.includes(timeSlot.split('-')[0]));
-
-          if (matchingSlot) {
-            return (
-              <td key={index}>
-                <div className={`card ${matchingSlot.color}`}>
-                  <p>{matchingSlot.subject}</p>
-                  <p>{matchingSlot.location}</p>
-                </div>
-              </td>
-            );
-          } else if (multiSlot && multiSlot.time.includes('-')) {
-            const [start, end] = multiSlot.time.split('-');
-            const startTime = parseTime(start.trim());
-            const endTime = parseTime(end.trim());
-            const currentTime = parseTime(timeSlot.split('-')[0]);
-
-            if (currentTime >= startTime && currentTime < endTime) {
-              const colspan = Math.ceil((endTime - startTime) / 50);
-              return (
-                <td key={index} colSpan={colspan}>
-                  <div className={`card ${multiSlot.color}`}>
-                    <p>{multiSlot.subject}</p>
-                    <p>{multiSlot.location}</p>
-                  </div>
-                </td>
-              );
-            }
-          }
-
-          return <td key={index}></td>;
-        })}
+        {cells}
       </tr>
     );
   };
@@ -277,28 +269,30 @@ const TimetableApp = () => {
         )}
       </div>
 
-      <div className="table-container">
-        <table id="fullTimetable">
-          <thead>
-            <tr>
-              <th>Day</th>
-              <th>9:00-9:50</th>
-              <th>10:00-10:50</th>
-              <th>11:00-11:50</th>
-              <th>12:00-12:50</th>
-              <th>1:00-1:50</th>
-              <th>2:00-2:50</th>
-              <th>3:00-3:50</th>
-              <th>4:00-4:50</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(daySchedules).map(([day, slots]) => 
-              renderTimetableRow(day, slots)
-            )}
-          </tbody>
-        </table>
-      </div>
+      {showFullTimetable && (
+        <div className="table-container">
+          <table id="fullTimetable">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>9:00-10:00</th>
+                <th>10:00-11:00</th>
+                <th>11:00-12:00</th>
+                <th>12:00-1:00</th>
+                <th>1:00-2:00</th>
+                <th>2:00-3:00</th>
+                <th>3:00-4:00</th>
+                <th>4:00-5:00</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(daySchedules).map(([day, slots]) => 
+                renderTimetableRow(day, slots)
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <Notification 
         message={notification.message}
@@ -322,3 +316,4 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+```
