@@ -142,13 +142,13 @@ const TimetableApp = () => {
       const timeUntilNext = start - currentMinutes;
 
       if (timeUntilNext <= 10 && timeUntilNext > 0) {
-        showNotification(`⏰ ${nextClass.subject} starts in ${timeUntilNext} minutes!`);
+        showNotification(`${nextClass.subject} starts in ${timeUntilNext} minutes!`);
         setLastNotifiedClass(nextClass.subject);
       }
     }
 
     if (currentClass && lastNotifiedClass !== `current-${currentClass.subject}`) {
-      showNotification(`📚 ${currentClass.subject} is now in session!`);
+      showNotification(`${currentClass.subject} is now in session!`);
       setLastNotifiedClass(`current-${currentClass.subject}`);
     }
   }, [currentClass, nextClass, currentMinutes, lastNotifiedClass, showNotification]);
@@ -158,7 +158,7 @@ const TimetableApp = () => {
     setDarkMode(newDarkMode);
     document.body.classList.toggle('dark-mode', newDarkMode);
     localStorage.setItem('darkMode', newDarkMode);
-    showNotification(`${newDarkMode ? '🌙' : '☀️'} ${newDarkMode ? 'Dark' : 'Light'} mode activated!`);
+    showNotification(`${newDarkMode ? 'Dark' : 'Light'} mode activated!`);
   };
 
   const toggleFullTimetable = () => {
@@ -167,7 +167,7 @@ const TimetableApp = () => {
 
   const renderTodaySchedule = () => {
     if (todaySlots.length === 0) {
-      return <p>🎉 No Classes Today! Enjoy your free time!</p>;
+      return <p>No Classes Today! Enjoy your free time!</p>;
     }
 
     return todaySlots.map((slot, index) => {
@@ -187,44 +187,59 @@ const TimetableApp = () => {
   };
 
   const renderTimetableRow = (day, slots) => {
-    const tableHours = [540, 600, 660, 720, 780, 840, 900, 960];
-
-    const scheduleMap = new Map();
-    slots.forEach(slot => {
-      const startTime = parseTime(slot.time.split('-')[0].trim());
-      scheduleMap.set(startTime, slot);
-    });
+    const timeSlots = [
+      { start: 540, end: 600, label: '9:00-10:00' },
+      { start: 600, end: 660, label: '10:00-11:00' },
+      { start: 660, end: 720, label: '11:00-12:00' },
+      { start: 720, end: 780, label: '12:00-1:00' },
+      { start: 780, end: 840, label: '1:00-2:00' },
+      { start: 840, end: 900, label: '2:00-3:00' },
+      { start: 900, end: 960, label: '3:00-4:00' },
+      { start: 960, end: 1020, label: '4:00-5:00' }
+    ];
 
     const cells = [];
-    for (let i = 0; i < tableHours.length; ) {
-      const hourStart = tableHours[i];
-      const matchingSlot = scheduleMap.get(hourStart);
+    let slotIndex = 0;
 
-      if (matchingSlot) {
-        const [startStr, endStr] = matchingSlot.time.split('-');
+    for (let i = 0; i < timeSlots.length; i++) {
+      const timeSlot = timeSlots[i];
+      let found = false;
+
+      for (let j = slotIndex; j < slots.length; j++) {
+        const slot = slots[j];
+        const [startStr, endStr] = slot.time.split('-');
         const startTime = parseTime(startStr.trim());
         const endTime = parseTime(endStr.trim());
-        const duration = endTime - startTime;
-        const colspan = Math.round(duration / 60);
 
-        cells.push(
-          <td key={`${day}-${hourStart}`} colSpan={colspan}>
-            <div className={`card ${matchingSlot.color}`}>
-              <p>{matchingSlot.subject}</p>
-              <p>{matchingSlot.location}</p>
-            </div>
-          </td>
-        );
-        i += colspan;
-      } else {
-        cells.push(<td key={`${day}-${hourStart}`} />);
-        i++;
+        if (startTime <= timeSlot.start && endTime > timeSlot.start) {
+          const duration = endTime - startTime;
+          const colspan = Math.ceil(duration / 60);
+          
+          cells.push(
+            <td key={`${day}-${startTime}`} colSpan={colspan} className="schedule-cell">
+              <div className={`timetable-card ${slot.color}`}>
+                <div className="subject">{slot.subject}</div>
+                <div className="location">{slot.location}</div>
+                <div className="time">{slot.time}</div>
+              </div>
+            </td>
+          );
+          
+          i += colspan - 1;
+          slotIndex = j + 1;
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        cells.push(<td key={`${day}-${timeSlot.start}`} className="empty-cell"></td>);
       }
     }
 
     return (
       <tr key={day}>
-        <td><strong>{day}</strong></td>
+        <td className="day-cell"><strong>{day}</strong></td>
         {cells}
       </tr>
     );
@@ -233,61 +248,64 @@ const TimetableApp = () => {
   return (
     <>
       <div className="header">
-        <h1>📚 B2 Timetable</h1>
+        <h1>B2 Timetable</h1>
         <div className="button-group">
-          <button onClick={toggleDarkMode}>
-            {darkMode ? '☀️' : '🌙'} Toggle {darkMode ? 'Light' : 'Dark'} Mode
+          <button onClick={toggleDarkMode} className="toggle-btn">
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
           </button>
-          <button onClick={toggleFullTimetable}>
-            📅 {showFullTimetable ? 'HIDE' : 'SHOW'} FULL TIMETABLE
+          <button onClick={toggleFullTimetable} className="toggle-btn">
+            {showFullTimetable ? 'Hide Full Timetable' : 'Show Full Timetable'}
           </button>
         </div>
       </div>
 
       <div className="stats-container">
-        <StatCard title="Total Classes Today" value={totalClasses} icon="📊" />
-        <StatCard title="Completed Classes" value={completedClasses} icon="✅" />
+        <StatCard title="Total Classes Today" value={totalClasses} icon="" />
+        <StatCard title="Completed Classes" value={completedClasses} icon="" />
       </div>
 
       <div id="todayScheduleContainer">
-        <h2>🎯 Today's Schedule - {currentDay}</h2>
+        <h2>Today's Schedule - {currentDay}</h2>
         <div className="schedule-cards">
           {renderTodaySchedule()}
         </div>
         {currentClass && (
           <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '1.1rem' }}>
-            📍 Currently in: <strong>{currentClass.subject}</strong> at <strong>{currentClass.location}</strong>
+            Currently in: <strong>{currentClass.subject}</strong> at <strong>{currentClass.location}</strong>
           </div>
         )}
         {nextClass && (
           <div style={{ textAlign: 'center', marginTop: '0.5rem', fontSize: '1rem', color: '#666' }}>
-            ⏭️ Next: <strong>{nextClass.subject}</strong> at <strong>{nextClass.time}</strong>
+            Next: <strong>{nextClass.subject}</strong> at <strong>{nextClass.time}</strong>
           </div>
         )}
       </div>
 
       {showFullTimetable && (
-        <div className="table-container">
-          <table id="fullTimetable">
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>9:00-10:00</th>
-                <th>10:00-11:00</th>
-                <th>11:00-12:00</th>
-                <th>12:00-1:00</th>
-                <th>1:00-2:00</th>
-                <th>2:00-3:00</th>
-                <th>3:00-4:00</th>
-                <th>4:00-5:00</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(daySchedules).map(([day, slots]) => 
-                renderTimetableRow(day, slots)
-              )}
-            </tbody>
-          </table>
+        <div className="table-container" style={{ display: 'block', marginTop: '2rem' }}>
+          <h2>Full Weekly Timetable</h2>
+          <div style={{ overflowX: 'auto' }}>
+            <table id="fullTimetable" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={{ minWidth: '100px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>Day</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>9:00-10:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>10:00-11:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>11:00-12:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>12:00-1:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>1:00-2:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>2:00-3:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>3:00-4:00</th>
+                  <th style={{ minWidth: '120px', padding: '12px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}>4:00-5:00</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(daySchedules).map(([day, slots]) => 
+                  renderTimetableRow(day, slots)
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -296,6 +314,76 @@ const TimetableApp = () => {
         show={notification.show}
         onClose={hideNotification}
       />
+
+      <style jsx>{`
+        .schedule-cell, .empty-cell, .day-cell {
+          padding: 8px;
+          border: 1px solid #ddd;
+          text-align: center;
+          vertical-align: middle;
+        }
+        
+        .day-cell {
+          background-color: #f8f9fa;
+          font-weight: bold;
+          min-width: 100px;
+        }
+        
+        .empty-cell {
+          background-color: #fafafa;
+          height: 60px;
+        }
+        
+        .timetable-card {
+          padding: 8px;
+          border-radius: 8px;
+          min-height: 50px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          text-align: center;
+        }
+        
+        .timetable-card.blue { background-color: #e3f2fd; }
+        .timetable-card.green { background-color: #e8f5e8; }
+        .timetable-card.red { background-color: #ffebee; }
+        .timetable-card.lavender { background-color: #f3e5f5; }
+        
+        .timetable-card .subject {
+          font-weight: bold;     
+          font-size: 0.9rem;
+          margin-bottom: 4px;
+        }
+        
+        .timetable-card .location {
+          font-size: 0.8rem;
+          color: #666;
+          margin-bottom: 2px;
+        }
+        
+        .timetable-card .time {
+          font-size: 0.7rem;
+          color: #888;
+        }
+        
+        .table-container {
+          margin-top: 2rem;
+        }
+        
+        .toggle-btn {
+          padding: 8px 16px;
+          margin: 0 4px;
+          border: none;
+          border-radius: 4px;
+          background-color: #007bff;
+          color: white;
+          cursor: pointer;
+        }
+        
+        .toggle-btn:hover {
+          background-color: #0056b3;
+        }
+      `}</style>
     </>
   );
 };
