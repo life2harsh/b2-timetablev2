@@ -9,7 +9,7 @@ const daySchedules = {
   ],
   Tuesday: [
     { time: '9:00-10:00', subject: 'Maths AIDS (Lec)', location: 'FF6', color: 'blue' },
-    { time: '10:00-11:00', subject: 'UNIX (Lec)', location: 'CR256', color: 'green' },
+    { time: '10:00-11:00', subject: 'UNIX (Lec)', location: 'CR526', color: 'green' },
     { time: '11:00-12:00', subject: 'Computational Theory', location: 'G3', color: 'red' },
     { time: '2:00-3:00', subject: 'Data Structures', location: 'G1', color: 'blue' },
     { time: '4:00-5:00', subject: 'Economics', location: 'FF6', color: 'green' }
