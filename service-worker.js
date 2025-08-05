@@ -1,4 +1,4 @@
-const CACHE_NAME = 'b2-timetable-cache-v24efefr63798598765445dfdfdfdfgfdgr786';
+const CACHE_NAME = 'b2-timetable-cache63798598765445dfdfdfdfgfdgr786';
 
 const ASSETS_TO_CACHE = [
   '/',
