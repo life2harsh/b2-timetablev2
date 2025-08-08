@@ -1,4 +1,4 @@
-const CACHE_NAME = 'b2-timetable-cache63798598765445dfdfdfdfgfdgr786';
+const CACHE_NAME = '1';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -71,3 +71,4 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
